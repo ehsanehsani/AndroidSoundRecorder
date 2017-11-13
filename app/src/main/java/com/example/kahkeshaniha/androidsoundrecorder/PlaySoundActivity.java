@@ -1,20 +1,24 @@
 package com.example.kahkeshaniha.androidsoundrecorder;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.app.Activity;
-import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+        import android.app.Activity;
+        import android.database.Cursor;
+        import android.database.sqlite.SQLiteDatabase;
+        import android.database.sqlite.SQLiteOpenHelper;
+        import android.media.MediaPlayer;
+        import android.os.Bundle;
+        import android.view.View;
+        import android.widget.LinearLayout;
+        import android.widget.TextView;
+        import android.widget.Toast;
+
+        import java.io.IOException;
 
 public class PlaySoundActivity extends Activity {
+
+    MediaPlayer mediaPlayer;
+    String audioSavePathInDevice = null;
+    int position;
+
     public static final String EXTRA_SOUNDNO = "soundNo";
     private int soundNo;
     private Cursor cursor;
@@ -34,6 +38,7 @@ public class PlaySoundActivity extends Activity {
 
             if (cursor.moveToFirst()) {
                 String name = cursor.getString(0);
+                audioSavePathInDevice = cursor.getString(1);
                 String length = cursor.getString(2);
                 String size = cursor.getString(3);
 
@@ -55,11 +60,12 @@ public class PlaySoundActivity extends Activity {
     }
 
     public void onBackVoiceClicked(View view) {
+        soundNo--;
         try {
             SQLiteOpenHelper soundRecorderDatabaseHelper = new SoundRecorderDatabaseHelper(this);
             SQLiteDatabase db = soundRecorderDatabaseHelper.getReadableDatabase();
             Cursor cursor = db.query("SOUND", new String[]{"NAME", "LENGTH", "SIZE"}, "_id = ?",
-                    new String[]{Integer.toString(soundNo - 1)}, null, null, null);
+                    new String[]{Integer.toString(soundNo)}, null, null, null);
 
             if (cursor.moveToFirst()) {
                 String name = cursor.getString(0);
@@ -73,7 +79,6 @@ public class PlaySoundActivity extends Activity {
                 TextView sizeText = (TextView) findViewById(R.id.sizeView);
                 sizeText.setText(size);
 
-                soundNo--;
                 db.close();
                 cursor.close();
             } else {
@@ -93,14 +98,64 @@ public class PlaySoundActivity extends Activity {
         }
     }
 
-    public void onPlayVoiceClicked(View view) {
-        LinearLayout playLinearLayout = (LinearLayout) findViewById(R.id.playLinearLayout);
-        playLinearLayout.setVisibility(View.INVISIBLE);
-        LinearLayout pauseLinearLayout = (LinearLayout) findViewById(R.id.pauseLinearLayout);
-        pauseLinearLayout.setVisibility(View.VISIBLE);
+    public void onPlayVoiceClicked(View view) throws IOException {
+
+        mediaPlayer = new MediaPlayer();
+
+        TextView nameText = (TextView) findViewById(R.id.nameView);
+
+        if (nameText.getText().toString().equals("") || nameText.getText().toString().equals("No Sound Exist")
+                || nameText.getText().toString().equals("Sound Deleted")) {
+            LinearLayout playLinearLayout = (LinearLayout) findViewById(R.id.playLinearLayout);
+            playLinearLayout.setVisibility(View.VISIBLE);
+            LinearLayout pauseLinearLayout = (LinearLayout) findViewById(R.id.pauseLinearLayout);
+            pauseLinearLayout.setVisibility(View.INVISIBLE);
+            Toast toast = Toast.makeText(PlaySoundActivity.this, "No Sound Selected", Toast.LENGTH_SHORT);
+            toast.show();
+        } else {
+            LinearLayout playLinearLayout = (LinearLayout) findViewById(R.id.playLinearLayout);
+            playLinearLayout.setVisibility(View.INVISIBLE);
+            LinearLayout pauseLinearLayout = (LinearLayout) findViewById(R.id.pauseLinearLayout);
+            pauseLinearLayout.setVisibility(View.VISIBLE);
+
+            if (!mediaPlayer.isPlaying()) {
+                try {
+
+                    mediaPlayer.setDataSource(audioSavePathInDevice);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                mediaPlayer.seekTo(position);
+                mediaPlayer.start();
+            }
+
+            Toast toast = Toast.makeText(PlaySoundActivity.this, "Sound is Playing", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     public void onPauseVoiceClicked(View view) {
+        super.onPause();
+        mediaPlayer.pause();
+        position = mediaPlayer.getCurrentPosition();
+
+        LinearLayout pauseLinearLayout = (LinearLayout) findViewById(R.id.pauseLinearLayout);
+        pauseLinearLayout.setVisibility(View.INVISIBLE);
+        LinearLayout playLinearLayout = (LinearLayout) findViewById(R.id.playLinearLayout);
+        playLinearLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onStopVoiceClicked(View view) {
+        try {
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         LinearLayout pauseLinearLayout = (LinearLayout) findViewById(R.id.pauseLinearLayout);
         pauseLinearLayout.setVisibility(View.INVISIBLE);
@@ -109,11 +164,12 @@ public class PlaySoundActivity extends Activity {
     }
 
     public void onNextVoiceClicked(View view) {
+        soundNo++;
         try {
             SQLiteOpenHelper soundRecorderDatabaseHelper = new SoundRecorderDatabaseHelper(this);
             SQLiteDatabase db = soundRecorderDatabaseHelper.getReadableDatabase();
             Cursor cursor = db.query("SOUND", new String[]{"NAME", "LENGTH", "SIZE"}, "_id = ?",
-                    new String[]{Integer.toString(soundNo + 1)}, null, null, null);
+                    new String[]{Integer.toString(soundNo)}, null, null, null);
 
             if (cursor.moveToFirst()) {
                 String name = cursor.getString(0);
@@ -127,7 +183,6 @@ public class PlaySoundActivity extends Activity {
                 TextView sizeText = (TextView) findViewById(R.id.sizeView);
                 sizeText.setText(size);
 
-                soundNo++;
                 db.close();
                 cursor.close();
 
