@@ -1,12 +1,16 @@
 package com.example.kahkeshaniha.androidsoundrecorder;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
@@ -17,6 +21,9 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
+    private String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private static final int REQUEST_RECORD_AUDIO_STORAG_PERMISSION = 1;
+
     private SQLiteDatabase db;
     private Cursor cursor;
 
@@ -26,6 +33,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_STORAG_PERMISSION);
 
         soundListView = (ListView) findViewById(R.id.soundListView);
         try {
@@ -40,17 +49,7 @@ public class MainActivity extends Activity {
             toast.show();
         }
 
-        if (soundListView.getCount() == 0) {
-            LinearLayout emptyLinearLayout = (LinearLayout) findViewById(R.id.emptyLinearLayout);
-            emptyLinearLayout.setVisibility(View.VISIBLE);
-            LinearLayout fullLinearLayout = (LinearLayout) findViewById(R.id.fullLinearLayout);
-            fullLinearLayout.setVisibility(View.INVISIBLE);
-        } else {
-            LinearLayout emptyLinearLayout = (LinearLayout) findViewById(R.id.emptyLinearLayout);
-            emptyLinearLayout.setVisibility(View.INVISIBLE);
-            LinearLayout fullLinearLayout = (LinearLayout) findViewById(R.id.fullLinearLayout);
-            fullLinearLayout.setVisibility(View.VISIBLE);
-        }
+        CheckSoundList();
 
         soundListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -90,6 +89,10 @@ public class MainActivity extends Activity {
             toast.show();
         }
 
+        CheckSoundList();
+    }
+
+    public void CheckSoundList(){
         if (soundListView.getCount() == 0) {
             LinearLayout emptyLinearLayout = (LinearLayout) findViewById(R.id.emptyLinearLayout);
             emptyLinearLayout.setVisibility(View.VISIBLE);
@@ -101,5 +104,18 @@ public class MainActivity extends Activity {
             LinearLayout fullLinearLayout = (LinearLayout) findViewById(R.id.fullLinearLayout);
             fullLinearLayout.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        boolean permissionToRecordAccepted = false;
+        switch (requestCode) {
+            case REQUEST_RECORD_AUDIO_STORAG_PERMISSION:
+                permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+        if (!permissionToRecordAccepted)
+            finish();
     }
 }
