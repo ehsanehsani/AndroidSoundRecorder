@@ -44,6 +44,9 @@ public class MainActivity extends Activity {
             CursorAdapter cursorAdapter = new SimpleCursorAdapter(MainActivity.this, android.R.layout.simple_list_item_1,
                     cursor, new String[]{"NAME"}, new int[]{android.R.id.text1}, 0);
             soundListView.setAdapter(cursorAdapter);
+
+            soundListView.setEmptyView(findViewById(R.id.emptyElement));
+
         } catch (Exception e) {
             Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
             toast.show();
@@ -93,17 +96,17 @@ public class MainActivity extends Activity {
     }
 
     public void CheckSoundList(){
-        if (soundListView.getCount() == 0) {
-            LinearLayout emptyLinearLayout = (LinearLayout) findViewById(R.id.emptyLinearLayout);
-            emptyLinearLayout.setVisibility(View.VISIBLE);
-            LinearLayout fullLinearLayout = (LinearLayout) findViewById(R.id.fullLinearLayout);
-            fullLinearLayout.setVisibility(View.INVISIBLE);
-        } else {
-            LinearLayout emptyLinearLayout = (LinearLayout) findViewById(R.id.emptyLinearLayout);
-            emptyLinearLayout.setVisibility(View.INVISIBLE);
-            LinearLayout fullLinearLayout = (LinearLayout) findViewById(R.id.fullLinearLayout);
-            fullLinearLayout.setVisibility(View.VISIBLE);
-        }
+//        if (soundListView.getCount() == 0) {
+//            LinearLayout emptyLinearLayout = (LinearLayout) findViewById(R.id.emptyLinearLayout);
+//            emptyLinearLayout.setVisibility(View.VISIBLE);
+//            LinearLayout fullLinearLayout = (LinearLayout) findViewById(R.id.fullLinearLayout);
+//            fullLinearLayout.setVisibility(View.INVISIBLE);
+//        } else {
+//            LinearLayout emptyLinearLayout = (LinearLayout) findViewById(R.id.emptyLinearLayout);
+//            emptyLinearLayout.setVisibility(View.INVISIBLE);
+//            LinearLayout fullLinearLayout = (LinearLayout) findViewById(R.id.fullLinearLayout);
+//            fullLinearLayout.setVisibility(View.VISIBLE);
+//        }
     }
 
     @Override

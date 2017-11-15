@@ -6,7 +6,7 @@
     android:background="#000000"
     android:layoutDirection="ltr"
     android:padding="16dp"
-    tools:context="com.example.amin.soundrecorder.PlaySoundActivity">
+    tools:context="com.example.kahkeshaniha.androidsoundrecorder.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
